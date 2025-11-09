@@ -1,0 +1,82 @@
+{
+  "uid": "combined_anomaly_predicted_attacks",
+  "title": "Anomaly + Predicted Attacks",
+  "timezone": "browser",
+  "schemaVersion": 36,
+  "version": 1,
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Anomaly Score + Predicted Attacks (overlay)",
+      "datasource": {
+        "type": "postgres",
+        "uid": null,
+        "name": "PostgresInfra"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT $__time(to_timestamp(\"Date\" || ' ' || \"Time\", 'DD-MM-YYYY HH24:MI:SS') ), NULLIF(\"anomaly_score\", '')::double precision as anomaly_score FROM predictions_staging WHERE NULLIF(\"anomaly_score\", '')::double precision IS NOT NULL ORDER BY 1;",
+          "format": "time_series"
+        },
+        {
+          "refId": "B",
+          "rawSql": "SELECT $__time(to_timestamp(\"Date\" || ' ' || \"Time\", 'DD-MM-YYYY HH24:MI:SS') ), sum(CASE WHEN lower(\"pred_attack\") IN ('true','t','1','yes') THEN 1 ELSE 0 END) as attacks FROM predictions_staging WHERE to_timestamp(\"Date\" || ' ' || \"Time\", 'DD-MM-YYYY HH24:MI:SS') IS NOT NULL GROUP BY 1 ORDER BY 1;",
+          "format": "time_series"
+        }
+      ],
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Recent Predicted Attacks (last 1h)",
+      "datasource": {
+        "type": "postgres",
+        "uid": null,
+        "name": "PostgresInfra"
+      },
+      "targets": [
+        {
+          "refId": "C",
+          "rawSql": "SELECT count(*) FROM predictions_staging WHERE lower(\"pred_attack\") IN ('true','t','1','yes') AND $__timeFilter(to_timestamp(\"Date\" || ' ' || \"Time\", 'DD-MM-YYYY HH24:MI:SS') );"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 0,
+        "y": 10
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Recent Avg Anomaly (last 1h)",
+      "datasource": {
+        "type": "postgres",
+        "uid": null,
+        "name": "PostgresInfra"
+      },
+      "targets": [
+        {
+          "refId": "D",
+          "rawSql": "SELECT avg(NULLIF(\"anomaly_score\", '')::double precision) FROM predictions_staging WHERE NULLIF(\"anomaly_score\", '')::double precision IS NOT NULL AND $__timeFilter(to_timestamp(\"Date\" || ' ' || \"Time\", 'DD-MM-YYYY HH24:MI:SS') );"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 12,
+        "y": 10
+      }
+    }
+  ],
+  "refresh": "10s"
+}

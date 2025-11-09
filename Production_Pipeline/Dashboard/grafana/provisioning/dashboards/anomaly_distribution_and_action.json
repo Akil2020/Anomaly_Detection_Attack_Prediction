@@ -1,0 +1,79 @@
+{
+  "uid": "anomaly_distribution_and_action",
+  "title": "Anomaly Distribution & Action",
+  "timezone": "browser",
+  "schemaVersion": 36,
+  "version": 1,
+  "panels": [
+    {
+      "id": 1,
+      "type": "histogram",
+      "title": "Anomaly Score Distribution",
+      "datasource": {
+        "type": "postgres",
+        "uid": null,
+        "name": "PostgresInfra"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT NULLIF(\"anomaly_score\", '')::double precision as value, count(*) as cnt FROM predictions_staging WHERE NULLIF(\"anomaly_score\", '')::double precision IS NOT NULL GROUP BY 1 ORDER BY 1;",
+          "format": "table"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": 2,
+      "type": "barchart",
+      "title": "Avg Anomaly Score by Action",
+      "datasource": {
+        "type": "postgres",
+        "uid": null,
+        "name": "PostgresInfra"
+      },
+      "targets": [
+        {
+          "refId": "B",
+          "rawSql": "SELECT \"Action\" as metric, avg(NULLIF(\"anomaly_score\", '')::double precision) as value FROM predictions_staging WHERE NULLIF(\"anomaly_score\", '')::double precision IS NOT NULL AND \"Action\" IS NOT NULL GROUP BY 1 ORDER BY value DESC LIMIT 20;",
+          "format": "table"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      }
+    },
+    {
+      "id": 3,
+      "type": "table",
+      "title": "High-Anomaly Recent Records (anomaly_score > 0.7)",
+      "datasource": {
+        "type": "postgres",
+        "uid": null,
+        "name": "PostgresInfra"
+      },
+      "targets": [
+        {
+          "refId": "C",
+          "rawSql": "SELECT * FROM predictions_staging WHERE NULLIF(\"anomaly_score\", '')::double precision IS NOT NULL AND NULLIF(\"anomaly_score\", '')::double precision > 0.7 ORDER BY \"ts\" DESC LIMIT 200;",
+          "format": "table"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      }
+    }
+  ],
+  "refresh": "10s"
+}

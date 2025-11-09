@@ -1,0 +1,12 @@
+apiVersion: 1
+
+datasources:
+  - name: PostgresInfra
+    type: postgres
+    access: proxy
+    url: direct_pg:5432
+    database: infra_db
+    user: mluser
+    secureJsonData:
+      password: mlpass
+    isDefault: true

@@ -1,0 +1,77 @@
+{
+  "uid": "anomaly_vs_features",
+  "title": "Anomaly vs Features",
+  "timezone": "browser",
+  "schemaVersion": 36,
+  "version": 1,
+  "panels": [
+    {
+      "id": 1,
+      "type": "table",
+      "title": "Anomaly vs Features (table)",
+      "datasource": {
+        "type": "postgres",
+        "uid": null,
+        "name": "PostgresInfra"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT \"ts\", \"Source\", \"Destination\", \"Packets\", \"Bytes\", \"Duration\", NULLIF(\"anomaly_score\", '')::double precision as anomaly_score FROM predictions_staging WHERE NULLIF(\"anomaly_score\", '')::double precision IS NOT NULL AND \"Packets\" IS NOT NULL AND \"Bytes\" IS NOT NULL LIMIT 10000;",
+          "format": "table"
+        }
+      ],
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Correlation: anomaly vs Packets (approx)",
+      "datasource": {
+        "type": "postgres",
+        "uid": null,
+        "name": "PostgresInfra"
+      },
+      "targets": [
+        {
+          "refId": "B",
+          "rawSql": "SELECT corr(NULLIF(\"anomaly_score\", '')::double precision, \"Packets\"::double precision) FROM predictions_staging WHERE NULLIF(\"anomaly_score\", '')::double precision IS NOT NULL AND \"Packets\" IS NOT NULL;"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 0,
+        "y": 12
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Correlation: anomaly vs Bytes (approx)",
+      "datasource": {
+        "type": "postgres",
+        "uid": null,
+        "name": "PostgresInfra"
+      },
+      "targets": [
+        {
+          "refId": "C",
+          "rawSql": "SELECT corr(NULLIF(\"anomaly_score\", '')::double precision, \"Bytes\"::double precision) FROM predictions_staging WHERE NULLIF(\"anomaly_score\", '')::double precision IS NOT NULL AND \"Bytes\" IS NOT NULL;"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 12,
+        "y": 12
+      }
+    }
+  ],
+  "refresh": "10s"
+}

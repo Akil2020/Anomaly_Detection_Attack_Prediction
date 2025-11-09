@@ -1,0 +1,100 @@
+{
+  "uid": "predicted_attacks_overview",
+  "title": "Predicted Attacks Overview",
+  "timezone": "browser",
+  "schemaVersion": 36,
+  "version": 1,
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Predicted Attacks Over Time",
+      "datasource": {
+        "type": "postgres",
+        "uid": null,
+        "name": "PostgresInfra"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT $__time(to_timestamp(\"Date\" || ' ' || \"Time\", 'DD-MM-YYYY HH24:MI:SS') ), sum(CASE WHEN lower(\"pred_attack\") IN ('true','t','1','yes') THEN 1 ELSE 0 END) as attacks FROM predictions_staging WHERE to_timestamp(\"Date\" || ' ' || \"Time\", 'DD-MM-YYYY HH24:MI:SS') IS NOT NULL GROUP BY 1 ORDER BY 1;",
+          "format": "time_series"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": 2,
+      "type": "barchart",
+      "title": "Top Source IPs (predicted attacks)",
+      "datasource": {
+        "type": "postgres",
+        "uid": null,
+        "name": "PostgresInfra"
+      },
+      "targets": [
+        {
+          "refId": "B",
+          "rawSql": "SELECT \"Source\" as metric, count(*) as value FROM predictions_staging WHERE lower(\"pred_attack\") IN ('true','t','1','yes') GROUP BY 1 ORDER BY value DESC LIMIT 20;",
+          "format": "table"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Total Predicted Attacks",
+      "datasource": {
+        "type": "postgres",
+        "uid": null,
+        "name": "PostgresInfra"
+      },
+      "targets": [
+        {
+          "refId": "C",
+          "rawSql": "SELECT count(*) FROM predictions_staging WHERE lower(\"pred_attack\") IN ('true','t','1','yes');"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Distinct Attack Sources",
+      "datasource": {
+        "type": "postgres",
+        "uid": null,
+        "name": "PostgresInfra"
+      },
+      "targets": [
+        {
+          "refId": "D",
+          "rawSql": "SELECT count(distinct \"Source\") FROM predictions_staging WHERE lower(\"pred_attack\") IN ('true','t','1','yes');"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      }
+    }
+  ],
+  "refresh": "10s"
+}

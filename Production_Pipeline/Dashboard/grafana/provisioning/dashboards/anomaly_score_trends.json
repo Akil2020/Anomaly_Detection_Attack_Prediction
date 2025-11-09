@@ -1,0 +1,100 @@
+{
+  "uid": "anomaly_score_trends",
+  "title": "Anomaly Score Trends",
+  "timezone": "browser",
+  "schemaVersion": 36,
+  "version": 1,
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Anomaly Score (raw)",
+      "datasource": {
+        "type": "postgres",
+        "uid": null,
+        "name": "PostgresInfra"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT $__time(\"ts\"), NULLIF(\"anomaly_score\", '')::double precision as anomaly_score FROM predictions_staging WHERE NULLIF(\"anomaly_score\", '')::double precision IS NOT NULL ORDER BY 1;",
+          "format": "time_series"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Anomaly Score (5-min avg)",
+      "datasource": {
+        "type": "postgres",
+        "uid": null,
+        "name": "PostgresInfra"
+      },
+      "targets": [
+        {
+          "refId": "B",
+          "rawSql": "SELECT $__timeGroupAlias(\"ts\",'5m'), avg(NULLIF(\"anomaly_score\", '')::double precision) as value FROM predictions_staging WHERE NULLIF(\"anomaly_score\", '')::double precision IS NOT NULL GROUP BY 1 ORDER BY 1;",
+          "format": "time_series"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Current Avg Anomaly (all time)",
+      "datasource": {
+        "type": "postgres",
+        "uid": null,
+        "name": "PostgresInfra"
+      },
+      "targets": [
+        {
+          "refId": "C",
+          "rawSql": "SELECT avg(NULLIF(\"anomaly_score\", '')::double precision) FROM predictions_staging WHERE NULLIF(\"anomaly_score\", '')::double precision IS NOT NULL;"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Max Anomaly Score",
+      "datasource": {
+        "type": "postgres",
+        "uid": null,
+        "name": "PostgresInfra"
+      },
+      "targets": [
+        {
+          "refId": "D",
+          "rawSql": "SELECT max(NULLIF(\"anomaly_score\", '')::double precision) FROM predictions_staging;"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      }
+    }
+  ],
+  "refresh": "10s"
+}
